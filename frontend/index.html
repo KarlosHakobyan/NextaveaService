@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusinessServices — Сервис бытовых и клининговых услуг</title>
+
+    <!-- Подключение стилей -->
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+    <div id="app">
+        <!-- Шапка генерируется через JS -->
+        <header id="header-container"></header>
+
+        <!-- Основной контент страницы -->
+        <main id="main-content" class="page-container"></main>
+
+        <!-- Подвал генерируется через JS -->
+        <footer id="footer-container"></footer>
+    </div>
+
+    <!-- Установка lang для HTML из localStorage -->
+    <script>
+        const savedLang = localStorage.getItem('app_lang') || 'fr';
+        document.documentElement.lang = savedLang;
+    </script>
+
+    <!-- Главный скрипт приложения -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
