@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Sign in | Nextavéa Service Operations</title>
+
+    <!-- Same faces as the public site: Montserrat is self-hosted in
+         admin.css; Playfair Display and Manrope come from Google Fonts,
+         exactly as the public index.html loads them. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600&family=Playfair+Display:wght@700&display=swap">
+
+    <!--
+      Theme is applied before the stylesheet so the page cannot paint light
+      and then flip. Inline and synchronous on purpose.
+    -->
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('nx.theme');
+                var theme = (stored === 'light' || stored === 'dark')
+                    ? stored
+                    : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.style.colorScheme = theme;
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div class="login-screen">
+    <div class="login-panel">
+        <p class="login-mark">Nextavéa <span>Service</span></p>
+        <p class="login-kicker" id="login-kicker"></p>
+
+        <form class="login-form" id="login-form" novalidate>
+            <h1 id="login-title"></h1>
+            <p class="login-help" id="login-help"></p>
+
+            <div class="login-error" id="login-error" hidden></div>
+            <div class="login-hint" id="login-hint" hidden></div>
+
+            <label class="field">
+                <span class="field-label" id="login-key-label"></span>
+                <input class="input input-data" type="password" name="key"
+                       autocomplete="current-password" spellcheck="false"
+                       required autofocus>
+            </label>
+
+            <label class="login-remember">
+                <input type="checkbox" name="remember">
+                <span id="login-remember-label"></span>
+            </label>
+
+            <button type="submit" class="btn btn-primary btn-block" id="login-submit"></button>
+
+            <p class="login-note" id="login-note"></p>
+        </form>
+    </div>
+</div>
+
+<div id="toast-stack" class="toast-stack" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/login.js"></script>
+</body>
+</html>

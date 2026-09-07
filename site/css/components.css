@@ -1,0 +1,2226 @@
+/* ==========================================================================
+   Nextavéa Service Design System
+   Warm premium service brand: teal-ink structure, brass action color.
+   Layers: tokens · reset · layout · header/footer · buttons · hero ·
+           cards · portfolio/prices/about · contacts · a11y · responsive
+   ========================================================================== */
+
+/* ==========================================================================
+   0. WEBFONTS
+   Montserrat is self-hosted and carries the whole site. The top bar keeps
+   Playfair Display and Manrope (loaded from Google Fonts in index.html), and
+   is deliberately excluded from the Montserrat switch.
+   ========================================================================== */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/Montserrat-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/Montserrat-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ==========================================================================
+   1. TOKENS
+   ========================================================================== */
+:root {
+    /* --- Color: structure --- */
+    --ink:              #0F2A2E;
+    --ink-2:            #0A1F22;
+    /* Ink as heading text. Identical to --ink on a light page, but the two
+       diverge in dark mode, where --ink stays a dark fill and headings have
+       to become light. Use --ink for fills, --heading for type. */
+    --heading:          #0F2A2E;
+    --canvas:           #F7F5F1;
+    --canvas-2:         #EFEBE4;
+    /* Veil laid over the city photograph that backs the page. Canvas colour
+       at high opacity — the photo reads as texture, not as content. */
+    --bg-veil:          rgba(247, 245, 241, .90);
+    --surface:          #FFFFFF;
+    --border:           #E6E0D6;
+    --border-strong:    #D6CDBE;
+
+    /* --- Color: text --- */
+    --text:             #1A2E2C;
+    --text-2:           #5C6B68;
+    --text-3:           #8A938F;
+    --text-on-ink:      #EDE7DD;
+    --text-on-ink-2:    #A9B5B2;
+
+    /* --- Color: action --- */
+    --accent:           #B26A20;
+    --accent-hover:     #8F5318;
+    --accent-soft:      #FBF1E3;
+    --accent-line:      #E8CFA8;
+    --accent-on-ink:    #E0A458;
+
+    /* --- Color: semantic --- */
+    --price:            #2F6B4F;
+    --danger:           #B3261E;
+    --danger-soft:      #FDECEA;
+    --danger-line:      #F0BDB7;
+    --badge-repair-bg:      #F6E9D5;
+    --badge-repair-fg:      #8A5A16;
+    --badge-cleaning-bg:    #DDE9E7;
+    --badge-cleaning-fg:    #1F5551;
+    --badge-montage-bg:     #DFE9DD;
+    --badge-montage-fg:     #2F5A32;
+
+    /* --- Type ---
+       Site-wide: Montserrat, self-hosted.
+       Header-only: Playfair Display + Manrope, kept as-is by request. */
+    --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                    Roboto, Helvetica, Arial, sans-serif;
+    --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                 Roboto, Helvetica, Arial, sans-serif;
+
+    --font-header-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-header-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                        Roboto, Helvetica, Arial, sans-serif;
+
+    --fs-display:   clamp(2.25rem, 1.6rem + 2.6vw, 3.4rem);
+    --fs-title:     clamp(1.9rem, 1.5rem + 1.6vw, 2.6rem);
+    --fs-section:   clamp(1.5rem, 1.3rem + 0.9vw, 1.95rem);
+    --fs-card:      1.2rem;
+    --fs-body:      1rem;
+    --fs-sm:        0.875rem;
+    --fs-micro:     0.72rem;
+
+    /* --- Space (4px base) --- */
+    --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 24px;
+    --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+
+    /* --- Radii --- */
+    --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
+
+    /* --- Elevation (warm-tinted, never pure black) --- */
+    --sh-1: 0 1px 2px rgba(23, 36, 34, .05);
+    --sh-2: 0 2px 4px rgba(23, 36, 34, .04),
+            0 10px 20px -8px rgba(23, 36, 34, .10);
+    --sh-3: 0 4px 8px rgba(23, 36, 34, .05),
+            0 20px 40px -16px rgba(23, 36, 34, .20);
+
+    /* --- Layout --- */
+    --header-h: 68px;
+    --wrap: 1200px;
+
+    /* --- Motion --- */
+    --t-fast: 140ms cubic-bezier(.2, .6, .3, 1);
+    --t-base: 240ms cubic-bezier(.2, .6, .3, 1);
+}
+
+/* ==========================================================================
+   1b. DARK THEME
+   The same brand after dark, not a different one. Teal-ink deepens into the
+   page background, surfaces lift a step out of it, and the brass warms up so
+   it keeps its contrast against a dark ground. Only tokens are redefined,
+   so every rule below this point is written once and works in both themes.
+
+   `data-theme` is set by shared/theme.js, and by an inline snippet in the
+   page head so the correct colours are there before the first paint.
+   ========================================================================== */
+[data-theme="dark"] {
+    /* --- Structure --- */
+    --ink:              #0B2024;
+    --ink-2:            #071619;
+    --heading:          #F1ECE3;
+    --canvas:           #0A1E22;
+    --canvas-2:         #071A1D;
+    /* Heavier after dark: a night photo carries bright highlights that would
+       otherwise punch through and fight the light text. */
+    --bg-veil:          rgba(10, 30, 34, .92);
+    --surface:          #102A2F;
+    --border:           #1E3A3F;
+    --border-strong:    #2B4B51;
+
+    /* --- Text --- */
+    --text:             #E9E4DB;
+    --text-2:           #A7B4B1;
+    --text-3:           #7D8B88;
+    --text-on-ink:      #EDE7DD;
+    --text-on-ink-2:    #A9B5B2;
+
+    /* --- Action: brass lifted so it still reads against a dark ground --- */
+    --accent:           #D98B3A;
+    --accent-hover:     #E9A257;
+    --accent-soft:      #2B1F11;
+    --accent-line:      #4C3720;
+    --accent-on-ink:    #E0A458;
+
+    /* --- Semantic --- */
+    --price:            #6BB68C;
+    --danger:           #F2938B;
+    --danger-soft:      #331917;
+    --danger-line:      #5C2723;
+    --badge-repair-bg:      #33240F;
+    --badge-repair-fg:      #E5AC64;
+    --badge-cleaning-bg:    #16322E;
+    --badge-cleaning-fg:    #86C2BB;
+    --badge-montage-bg:     #1A3220;
+    --badge-montage-fg:     #93C599;
+
+    /* --- Elevation: depth comes from darkness, not from a warm grey --- */
+    --sh-1: 0 1px 2px rgba(0, 0, 0, .35);
+    --sh-2: 0 2px 4px rgba(0, 0, 0, .30),
+            0 10px 20px -8px rgba(0, 0, 0, .45);
+    --sh-3: 0 4px 8px rgba(0, 0, 0, .32),
+            0 20px 40px -16px rgba(0, 0, 0, .60);
+}
+
+/* A dark wash is invisible on a dark page, so the ghost button lightens
+   instead of darkening. */
+[data-theme="dark"] .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, .06);
+}
+
+/* The header sits on a near-black ink in dark mode, so its translucent fill
+   has to be re-tinted or it washes out against the page behind it. */
+[data-theme="dark"] header {
+    background-color: rgba(7, 22, 25, .94);
+}
+
+/* The night version of the city shot backs the dark page; only the image
+   swaps, the veil comes from --bg-veil above. */
+[data-theme="dark"] body::before {
+    background-image:
+        linear-gradient(var(--bg-veil), var(--bg-veil)),
+        url('../assets/img/background/city1.jpg');
+}
+
+/* Photography is mixed for a dark page: hold it back a little so it does not
+   glare, and let it come back to full strength on hover. */
+[data-theme="dark"] .portfolio-card img,
+[data-theme="dark"] .hero img {
+    filter: brightness(.86) saturate(.95);
+}
+[data-theme="dark"] .portfolio-card:hover img {
+    filter: none;
+}
+
+/* ==========================================================================
+   1c. THEME TOGGLE
+   Sits beside the language select in the header and is built to match it:
+   same height, same translucent fill, same border and hover.
+   ========================================================================== */
+.theme-toggle {
+    flex: none;
+    width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: rgba(255, 255, 255, .06);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: border-color var(--t-fast), background-color var(--t-fast);
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent-on-ink);
+    background-color: rgba(255, 255, 255, .10);
+}
+
+.theme-toggle svg {
+    width: 19px;
+    height: 19px;
+    display: block;
+}
+
+/* ==========================================================================
+   2. RESET & BASE
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* The canvas colour lives here rather than on body so it sits *behind*
+       the fixed photo layer below and shows through while the image loads. */
+    background-color: var(--canvas);
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    line-height: 1.65;
+    color: var(--text);
+    background-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* City photograph as the page ground. It is a fixed pseudo-element rather
+   than `background-attachment: fixed`, which stutters and mis-scales on
+   iOS. The veil above it is the canvas colour at high opacity: enough of
+   the photo comes through to give the page depth, while body text and the
+   ink headings keep their contrast against a near-flat ground. */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--bg-veil), var(--bg-veil)),
+        url('../assets/img/background/city.jpg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+img { display: block; max-width: 100%; }
+
+a { color: var(--accent); }
+a:hover { color: var(--accent-hover); }
+
+/* ==========================================================================
+   3. PAGE LAYOUT
+   ========================================================================== */
+.page-container {
+    max-width: var(--wrap);
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+    padding: calc(var(--header-h) + var(--s7)) var(--s5) var(--s8);
+}
+
+.page-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto var(--s7);
+}
+
+.page-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1.18;
+    letter-spacing: -.022em;
+    color: var(--heading);
+    margin-bottom: var(--s3);
+}
+
+.page-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-2);
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-section);
+    font-weight: 700;
+    letter-spacing: -.018em;
+    color: var(--heading);
+    text-align: center;
+    margin-bottom: var(--s6);
+}
+
+/* ==========================================================================
+   4. HEADER, NAV & FOOTER
+   ========================================================================== */
+header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(15, 42, 46, .94);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid rgba(224, 164, 88, .14);
+}
+
+.header-container {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    min-height: var(--header-h);
+    padding: 0 var(--s5);
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+}
+
+.logo {
+    flex: none;
+    font-family: var(--font-header-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: #FFFFFF;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.logo:hover { color: #FFFFFF; }
+.logo span { color: var(--accent-on-ink); }
+
+header nav {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-left: auto;
+    padding: var(--s3) var(--s1);
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+header nav::-webkit-scrollbar { display: none; }
+
+header nav > * {
+    flex: none;
+    scroll-snap-align: end;
+}
+
+header nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 13px;
+    border-radius: var(--r-sm);
+    color: var(--text-on-ink-2);
+    font-family: var(--font-header-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--t-fast), background-color var(--t-fast);
+}
+
+header nav a:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, .07);
+}
+
+header nav a.active {
+    color: var(--accent-on-ink);
+    background-color: rgba(224, 164, 88, .12);
+}
+
+header nav a.btn-nav {
+    margin-left: var(--s2);
+    background-color: var(--accent);
+    color: #FFFFFF;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+}
+
+header nav a.btn-nav:hover,
+header nav a.btn-nav.active {
+    background-color: var(--accent-hover);
+    color: #FFFFFF;
+}
+
+/* Language and theme sit outside <nav>. The nav scrolls horizontally once the
+   links stop fitting, and anything inside it scrolls out of reach with them,
+   which is exactly what happened to the theme button on a narrow window. */
+.header-controls {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+}
+
+.lang-select {
+    flex: none;
+    min-height: 44px;
+    padding: 0 10px;
+    background-color: rgba(255, 255, 255, .06);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: var(--r-sm);
+    font-family: var(--font-header-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color var(--t-fast), background-color var(--t-fast);
+}
+
+.lang-select:hover {
+    border-color: var(--accent-on-ink);
+    background-color: rgba(255, 255, 255, .10);
+}
+
+.lang-select option {
+    background-color: var(--ink);
+    color: #FFFFFF;
+}
+
+footer {
+    margin-top: auto;
+    padding: var(--s6) var(--s5);
+    background-color: var(--ink);
+    color: var(--text-on-ink-2);
+    border-top: 1px solid rgba(224, 164, 88, .14);
+    text-align: center;
+    font-size: var(--fs-sm);
+}
+
+.footer-content {
+    max-width: var(--wrap);
+    margin: 0 auto;
+}
+
+/* ==========================================================================
+   5. BUTTONS
+   ========================================================================== */
+.btn-primary,
+.btn-secondary,
+.btn-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: background-color var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast), transform var(--t-fast),
+                box-shadow var(--t-fast);
+}
+
+.btn-primary {
+    min-height: 44px;
+    padding: 0 var(--s5);
+    background-color: var(--accent);
+    color: #FFFFFF;
+    border: 1px solid var(--accent);
+    box-shadow: var(--sh-1);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+    box-shadow: var(--sh-2);
+}
+
+.btn-primary:active { transform: none; }
+
+.btn-secondary {
+    min-height: 44px;
+    padding: 0 var(--s5);
+    background-color: transparent;
+    color: var(--heading);
+    border: 1px solid var(--border-strong);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(15, 42, 46, .04);
+    border-color: var(--heading);
+    color: var(--heading);
+}
+
+.btn-card {
+    min-height: 44px;
+    padding: 0 var(--s4);
+    background-color: var(--accent);
+    color: #FFFFFF;
+    border: 1px solid var(--accent);
+}
+
+.btn-card:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #FFFFFF;
+}
+
+/* ==========================================================================
+   6. HERO
+   ========================================================================== */
+.hero-section {
+    text-align: center;
+    max-width: 880px;
+    margin: 0 auto var(--s8);
+}
+
+.hero-badge {
+    display: inline-block;
+    margin-bottom: var(--s5);
+    padding: 7px var(--s4);
+    background-color: var(--accent-soft);
+    color: var(--accent-hover);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+}
+
+.hero-section h1.page-title {
+    font-size: var(--fs-display);
+    margin-bottom: var(--s5);
+}
+
+.hero-section h1.page-title span { color: var(--accent); }
+
+.hero-section .page-subtitle {
+    max-width: 620px;
+    margin: 0 auto;
+    font-size: 1.08rem;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--s4);
+    margin-top: var(--s6);
+}
+
+.hero-stats {
+    display: flex;
+    margin-top: var(--s8);
+    overflow: hidden;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-1);
+}
+
+.stat-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--s5) var(--s4);
+}
+
+.stat-item + .stat-item { border-left: 1px solid var(--border); }
+
+.stat-num {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--heading);
+}
+
+.stat-desc {
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+}
+
+/* ==========================================================================
+   7. FEATURE CARDS
+   ========================================================================== */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s5);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-1);
+    transition: border-color var(--t-base), box-shadow var(--t-base),
+                transform var(--t-base);
+}
+
+.feature-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--sh-3);
+    transform: translateY(-4px);
+}
+
+.feature-img-wrapper {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background-color: var(--canvas-2);
+}
+
+.feature-img-wrapper::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 45%;
+    background: linear-gradient(to top, rgba(10, 31, 34, .35), transparent);
+    pointer-events: none;
+}
+
+.feature-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 600ms cubic-bezier(.2, .6, .3, 1);
+}
+
+.feature-card:hover .feature-img { transform: scale(1.05); }
+
+.feature-badge {
+    position: absolute;
+    top: var(--s3);
+    left: var(--s3);
+    z-index: 2;
+    padding: 6px 12px;
+    background-color: rgba(10, 31, 34, .88);
+    color: #FFFFFF;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.feature-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: var(--s5);
+}
+
+.feature-body h3 {
+    margin-bottom: var(--s2);
+    font-size: var(--fs-card);
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.feature-body p {
+    flex: 1;
+    margin-bottom: var(--s5);
+    font-size: .95rem;
+    color: var(--text-2);
+}
+
+.feature-link {
+    align-self: flex-start;
+    color: var(--accent);
+    font-size: .95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--t-fast), transform var(--t-fast);
+}
+
+.feature-card:hover .feature-link {
+    color: var(--accent-hover);
+    transform: translateX(3px);
+}
+
+/* ==========================================================================
+   8. SERVICE TABS & CARDS
+   ========================================================================== */
+.service-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--s2);
+    margin-bottom: var(--s7);
+}
+
+.tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    min-height: 44px;
+    padding: 0 var(--s4);
+    background-color: var(--surface);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast);
+}
+
+.tab-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.tab-btn.active {
+    background-color: var(--ink);
+    border-color: var(--ink);
+    color: #FFFFFF;
+}
+
+/* small leading icon on each category tab, same masks as the cards */
+.tab-btn[data-category="cleaning"]::before,
+.tab-btn[data-category="furniture"]::before,
+.tab-btn[data-category="restoration"]::before,
+.tab-btn[data-category="relocation"]::before {
+    content: '';
+    flex: none;
+    width: 18px;
+    height: 18px;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+            mask-position: center;
+    -webkit-mask-size: contain;
+            mask-size: contain;
+}
+
+#services-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: var(--s5);
+}
+
+.service-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--s5);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-1);
+    transition: border-color var(--t-base), box-shadow var(--t-base),
+                transform var(--t-base);
+}
+
+.service-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--sh-3);
+    transform: translateY(-4px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    margin-bottom: var(--s4);
+}
+
+.service-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background-color: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--r-md);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: background-color var(--t-base), border-color var(--t-base);
+}
+
+/* All four icons are PNG masks painted with currentColor, so they take the
+   tile's colour - brass by default, white when the tile fills on hover. */
+.service-icon::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 28px;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+            mask-position: center;
+    -webkit-mask-size: contain;
+            mask-size: contain;
+}
+
+.service-icon[data-icon="cleaning"]::before,
+.tab-btn[data-category="cleaning"]::before {
+    -webkit-mask-image: url('../assets/img/icons/cleaning.png');
+            mask-image: url('../assets/img/icons/cleaning.png');
+}
+
+/* furniture is supplied as full-colour artwork, so it is drawn as an image
+   rather than a currentColor mask - it keeps its own colours in every state. */
+.service-icon[data-icon="furniture"]::before,
+.tab-btn[data-category="furniture"]::before {
+    background-color: transparent;
+    background-image: url('../assets/img/icons/furniture.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    -webkit-mask-image: none;
+            mask-image: none;
+}
+
+.service-icon[data-icon="restoration"]::before,
+.tab-btn[data-category="restoration"]::before {
+    -webkit-mask-image: url('../assets/img/icons/restoration.png');
+            mask-image: url('../assets/img/icons/restoration.png');
+}
+
+.service-icon[data-icon="relocation"]::before,
+.tab-btn[data-category="relocation"]::before {
+    -webkit-mask-image: url('../assets/img/icons/relocation.png');
+            mask-image: url('../assets/img/icons/relocation.png');
+}
+
+
+.service-icon[data-icon="cleaning"]::before {
+    -webkit-mask-image: url('../assets/img/icons/cleaning.png');
+    mask-image: url('../assets/img/icons/cleaning.png');
+}
+
+.service-icon[data-icon="restoration"]::before {
+    -webkit-mask-image: url('../assets/img/icons/restoration.png');
+    mask-image: url('../assets/img/icons/restoration.png');
+}
+
+.service-icon[data-icon="relocation"]::before {
+    -webkit-mask-image: url('../assets/img/icons/relocation.png');
+    mask-image: url('../assets/img/icons/relocation.png');
+}
+
+.service-card:hover .service-icon {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #FFFFFF;
+}
+
+.badge {
+    padding: 5px 11px;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.badge-repair   { background-color: var(--badge-repair-bg);   color: var(--badge-repair-fg); }
+.badge-cleaning { background-color: var(--badge-cleaning-bg); color: var(--badge-cleaning-fg); }
+.badge-montage  { background-color: var(--badge-montage-bg);  color: var(--badge-montage-fg); }
+
+.service-title {
+    margin-bottom: var(--s2);
+    font-size: var(--fs-card);
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.service-desc {
+    flex: 1;
+    margin-bottom: var(--s5);
+    font-size: .95rem;
+    color: var(--text-2);
+}
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    margin-top: auto;
+    padding-top: var(--s4);
+    border-top: 1px solid var(--border);
+}
+
+.service-price {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--price);
+}
+
+/* ==========================================================================
+   9. PORTFOLIO
+   ========================================================================== */
+.portfolio-grid,
+.prices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: var(--s5);
+}
+
+.portfolio-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-1);
+    transition: border-color var(--t-base), box-shadow var(--t-base),
+                transform var(--t-base);
+}
+
+.portfolio-grid > .portfolio-card { padding: var(--s6); }
+
+.portfolio-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--sh-3);
+    transform: translateY(-4px);
+}
+
+.portfolio-card h3 {
+    margin-bottom: var(--s2);
+    font-size: var(--fs-card);
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.portfolio-card p {
+    font-size: .95rem;
+    color: var(--text-2);
+}
+
+.portfolio-tag {
+    align-self: flex-start;
+    margin-bottom: var(--s3);
+    padding: 5px 11px;
+    background-color: var(--accent-soft);
+    color: var(--accent-hover);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.portfolio-meta {
+    margin-top: auto;
+    padding-top: var(--s4);
+    font-size: var(--fs-sm);
+    color: var(--text-3);
+}
+
+/* --- Before / After --- */
+.portfolio-before-after-section { margin-top: var(--s9); }
+
+.portfolio-ba-title { font-size: var(--fs-section); }
+
+.portfolio-ba-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: var(--s5);
+}
+
+.portfolio-ba-card {
+    padding: 0;
+    cursor: pointer;
+}
+
+.card-images-preview {
+    position: relative;
+    display: flex;
+    height: 190px;
+}
+
+.preview-half {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+.preview-half + .preview-half { border-left: 1px solid rgba(255, 255, 255, .6); }
+
+.preview-half img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.img-label {
+    position: absolute;
+    left: var(--s2);
+    bottom: var(--s2);
+    padding: 3px 8px;
+    background-color: rgba(10, 31, 34, .78);
+    color: #FFFFFF;
+    border-radius: var(--r-sm);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.portfolio-ba-card h4 {
+    padding: var(--s4);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--heading);
+    text-align: center;
+}
+
+/* --- Comparison modal --- */
+.portfolio-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s5);
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(10, 31, 34, .72);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 760px;
+    padding: var(--s6);
+    background-color: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-3);
+}
+
+.modal-content h3 {
+    padding-right: var(--s7);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.modal-close {
+    position: absolute;
+    top: var(--s4);
+    right: var(--s4);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--canvas-2);
+    color: var(--heading);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast);
+}
+
+.modal-close:hover {
+    background-color: var(--ink);
+    border-color: var(--ink);
+    color: #FFFFFF;
+}
+
+.comparison-slider {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    margin-top: var(--s5);
+    overflow: hidden;
+    border-radius: var(--r-md);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.img-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+}
+
+.after-img { width: 100%; }
+
+.before-img { border-right: 2px solid var(--accent-on-ink); }
+
+.slider-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 10;
+    background: transparent;
+    cursor: ew-resize;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.slider-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0;
+    height: 0;
+}
+
+.slider-range::-moz-range-thumb {
+    width: 0;
+    height: 0;
+    border: 0;
+    background: transparent;
+}
+
+.slider-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    z-index: 5;
+    background-color: var(--accent-on-ink);
+    pointer-events: none;
+}
+
+.slider-handle::after {
+    content: '↔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--accent);
+    color: #FFFFFF;
+    border-radius: 50%;
+    font-size: 1rem;
+    box-shadow: var(--sh-2);
+}
+
+/* ==========================================================================
+   10. PRICES
+   ========================================================================== */
+.price-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--s6);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-1);
+}
+
+.price-card h3 {
+    font-size: var(--fs-card);
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.price-val {
+    margin: var(--s3) 0 var(--s4);
+    font-family: var(--font-display);
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--accent);
+}
+
+.price-card ul {
+    flex: 1;
+    margin-bottom: var(--s5);
+    list-style: none;
+}
+
+.price-card ul li {
+    position: relative;
+    margin-bottom: var(--s3);
+    padding-left: var(--s5);
+    font-size: .95rem;
+    line-height: 1.6;
+    color: var(--text-2);
+}
+
+.price-card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .62em;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    background-color: var(--accent-line);
+}
+
+.price-card .btn-primary { width: 100%; }
+
+/* Featured tier inverts to ink so "popular" reads at a glance. */
+.price-card.featured {
+    background-color: var(--ink);
+    border-color: var(--ink);
+    box-shadow: var(--sh-3);
+}
+
+.price-card.featured h3 { color: #FFFFFF; }
+.price-card.featured .price-val { color: var(--accent-on-ink); }
+.price-card.featured ul li { color: var(--text-on-ink-2); }
+.price-card.featured ul li::before { background-color: var(--accent-on-ink); }
+
+.popular-badge {
+    position: absolute;
+    top: -11px;
+    right: var(--s5);
+    padding: 4px 12px;
+    background-color: var(--accent);
+    color: #FFFFFF;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+/* ==========================================================================
+   11. ABOUT
+   ========================================================================== */
+.page-about .portfolio-card {
+    max-width: 68ch;
+    margin: 0 auto;
+    padding: var(--s7);
+    border-left: 3px solid var(--accent);
+}
+
+.page-about .portfolio-card:hover {
+    transform: none;
+    border-color: var(--border);
+    border-left-color: var(--accent);
+    box-shadow: var(--sh-1);
+}
+
+.page-about .portfolio-card p {
+    font-size: 1.06rem;
+    line-height: 1.85;
+    color: var(--text-2);
+}
+
+.page-about .portfolio-card p + p { margin-top: var(--s4); }
+/* ==========================================================================
+   12. CONTACTS
+   ========================================================================== */
+.contacts-wrapper {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: var(--s6);
+    align-items: stretch;      /* both columns share the row height */
+}
+
+.order-form { align-self: start; }
+
+.order-form {
+    padding: var(--s6);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-2);
+}
+
+.order-form h3 {
+    margin-bottom: var(--s5);
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s4);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: var(--s4);
+}
+
+.form-group label {
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px var(--s3);
+    background-color: var(--canvas);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    outline: none;
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    line-height: 1.5;
+    transition: background-color var(--t-fast), border-color var(--t-fast),
+                box-shadow var(--t-fast);
+}
+
+.form-group textarea {
+    min-height: 96px;
+    resize: vertical;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--text-3); }
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    background-color: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(178, 106, 32, .16);
+}
+
+.order-form .btn-primary {
+    width: 100%;
+    margin-top: var(--s2);
+}
+
+#form-status {
+    margin-top: var(--s4);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-2);
+}
+
+.contacts-info {
+    padding: var(--s6);
+    background-color: var(--ink);
+    color: var(--text-on-ink-2);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-2);
+}
+
+.contacts-info h3 {
+    margin-bottom: var(--s5);
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.contacts-info p {
+    padding: var(--s3) 0;
+    font-size: .98rem;
+}
+
+.contacts-info p + p { border-top: 1px solid rgba(255, 255, 255, .09); }
+
+.contacts-info strong {
+    color: var(--text-on-ink);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   12b. LOCATION PICKER (Leaflet + OpenStreetMap)
+   ========================================================================== */
+.contacts-side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s5);
+    min-width: 0;
+    height: 100%;
+    /* A grid item's automatic minimum is its min-content, which would push the
+       row taller than the form. Releasing it lets the row be sized by the form
+       alone, and the map below absorbs the remainder. */
+    min-height: 0;
+}
+
+.map-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;                   /* grow so the card bottom meets the form bottom */
+    min-height: 0;             /* ...and shrink, so it never overshoots it */
+    padding: var(--s5);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-2);
+}
+
+.map-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    margin-bottom: var(--s4);
+    flex-wrap: wrap;
+}
+
+.map-card-head h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.btn-locate {
+    min-height: 36px;
+    padding: 0 var(--s3);
+    font-size: var(--fs-sm);
+}
+
+.map-frame {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.order-map {
+    flex: 1;
+    min-height: 0;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background-color: var(--canvas-2);
+    z-index: 0;                     /* keep tiles under the fixed header */
+}
+
+/* Tells people the wheel is inert until they interact with the map. */
+.map-zoom-hint {
+    position: absolute;
+    left: 50%;
+    bottom: var(--s3);
+    transform: translateX(-50%);
+    z-index: 500;
+    margin: 0;
+    padding: 6px 12px;
+    max-width: calc(100% - var(--s5));
+    background-color: rgba(15, 42, 46, .82);
+    color: #FFFFFF;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-micro);
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity var(--t-fast);
+}
+
+.map-zoom-hint.is-hidden { opacity: 0; }
+
+.map-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background-color: transparent;
+    color: var(--heading);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background-color var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+
+.btn-icon:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-hover);
+}
+
+.icon-expand,
+.icon-close {
+    display: block;
+    width: 16px;
+    height: 16px;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+            mask-position: center;
+    -webkit-mask-size: contain;
+            mask-size: contain;
+}
+
+.icon-expand {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E");
+}
+
+.icon-close {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
+}
+
+/* ---- expanded map dialog ---- */
+body.map-modal-open { overflow: hidden; }
+
+.map-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s5);
+}
+
+.map-modal[hidden] { display: none; }
+
+.map-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(10, 31, 34, .72);
+    -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+}
+
+.map-modal-panel {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: min(1100px, 100%);
+    height: min(760px, 100%);
+    padding: var(--s5);
+    background-color: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-3);
+}
+
+.map-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    margin-bottom: var(--s4);
+}
+
+.map-modal-head h3 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.map-modal-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.map-modal-body .order-map {
+    flex: 1;
+    min-height: 0;
+}
+
+.map-status {
+    margin-top: var(--s3);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--text-2);
+    min-height: 2.6em;              /* reserve space so the card never jumps */
+}
+
+/* Brass teardrop marker, drawn in CSS so no image files are needed. */
+.map-pin-dot {
+    display: block;
+    width: 22px;
+    height: 22px;
+    margin: 0 auto;
+    background-color: var(--accent);
+    border: 2px solid #FFFFFF;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 2px 6px rgba(23, 36, 34, .35);
+}
+
+/* Leaflet chrome, retuned to the design system */
+.order-map .leaflet-container {
+    font-family: var(--font-sans);
+    background-color: var(--canvas-2);
+}
+
+.order-map .leaflet-bar a {
+    background-color: var(--surface);
+    color: var(--heading);
+    border-bottom-color: var(--border);
+}
+
+.order-map .leaflet-bar a:hover {
+    background-color: var(--accent-soft);
+    color: var(--accent-hover);
+}
+
+.order-map .leaflet-control-attribution {
+    background-color: rgba(255, 255, 255, .82);
+    color: var(--text-3);
+    font-size: 10px;
+}
+
+.order-map .leaflet-control-attribution a { color: var(--text-2); }
+
+/* ==========================================================================
+   13. FOCUS VISIBILITY
+   ========================================================================== */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+header :focus-visible,
+.price-card.featured :focus-visible {
+    outline-color: var(--accent-on-ink);
+}
+
+.form-group input:focus-visible,
+.form-group select:focus-visible,
+.form-group textarea:focus-visible { outline: none; }
+
+/* ==========================================================================
+   14. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .contacts-wrapper { grid-template-columns: 1fr; }
+
+    /* stacked: the map no longer needs to stretch to match a neighbour */
+    .contacts-side { height: auto; }
+    .map-card { flex: none; }
+    .map-frame,
+    .order-map { min-height: 260px; }
+
+    .map-modal { padding: 0; }
+    .map-modal-panel {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+    }
+    .comparison-slider { height: 340px; }
+}
+
+@media (max-width: 640px) {
+    .header-container {
+        padding: 0 var(--s4);
+        gap: var(--s3);
+    }
+
+    .page-container {
+        padding-left: var(--s4);
+        padding-right: var(--s4);
+        padding-bottom: var(--s7);
+    }
+
+    .hero-stats { flex-direction: column; }
+
+    .stat-item + .stat-item {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+    }
+
+    .form-grid-2 { grid-template-columns: 1fr; }
+
+    .order-form,
+    .contacts-info,
+    .price-card,
+    .modal-content,
+    .portfolio-grid > .portfolio-card,
+    .page-about .portfolio-card { padding: var(--s5); }
+
+    .comparison-slider { height: 280px; }
+
+    .portfolio-before-after-section { margin-top: var(--s8); }
+}
+
+/* ==========================================================================
+   15. REDUCED MOTION
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .feature-card:hover,
+    .service-card:hover,
+    .portfolio-card:hover,
+    .btn-primary:hover { transform: none; }
+
+    .feature-card:hover .feature-img,
+    .feature-card:hover .feature-link { transform: none; }
+}
+
+/* ==========================================================================
+   16. ORDER VALIDATION + CODE VERIFICATION
+   Every field on the order form is required, so the form has to say clearly
+   which one is wrong rather than relying on the browser's single bubble.
+   Errors are drawn under their field; the map pin has no control of its own,
+   so its error hangs under the address and tints the map card.
+
+   This section carries its own responsive and reduced-motion rules rather
+   than reaching back into sections 14 and 15, so it stays self-contained.
+   ========================================================================== */
+.field-error {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    color: var(--danger);
+}
+
+.field-error:empty { display: none; }
+
+.form-group.is-invalid input,
+.form-group.is-invalid select,
+.form-group.is-invalid textarea {
+    border-color: var(--danger);
+    background-color: var(--danger-soft);
+}
+
+.form-group.is-invalid input:focus,
+.form-group.is-invalid select:focus,
+.form-group.is-invalid textarea:focus {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(179, 38, 30, .16);
+}
+
+.form-group.is-invalid label { color: var(--danger); }
+
+.map-card.is-invalid {
+    border-radius: var(--r-lg);
+    outline: 2px solid var(--danger);
+    outline-offset: 4px;
+}
+
+#form-status[data-tone="error"] { color: var(--danger); }
+#form-status[data-tone="ok"]    { color: var(--price); }
+#form-status[data-tone="busy"]  { color: var(--accent); }
+
+/* --- The verification dialog ------------------------------------------- */
+.verify-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3100;              /* above the expanded map */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s5);
+}
+
+.verify-modal[hidden] { display: none; }
+
+.verify-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(10, 31, 34, .72);
+    -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+}
+
+.verify-modal-panel {
+    position: relative;
+    z-index: 1;
+    width: min(460px, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    padding: var(--s6);
+    background-color: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-3);
+}
+
+.verify-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    margin-bottom: var(--s4);
+}
+
+.verify-modal-head h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--heading);
+}
+
+.verify-sent {
+    margin-bottom: var(--s5);
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--text-2);
+}
+
+.verify-sent strong { color: var(--text); }
+
+/* Demo mode is never dressed up to look live: it is a warm, obvious notice
+   that names itself and prints the code the backend would have sent. */
+.verify-demo {
+    margin-bottom: var(--s4);
+    padding: var(--s3) var(--s4);
+    background-color: var(--accent-soft);
+    border: 1px dashed var(--accent-line);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--text-2);
+}
+
+.verify-demo strong { color: var(--accent); }
+
+.verify-demo-code {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    color: var(--heading);
+}
+
+.verify-digits {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--s2);
+    margin-bottom: var(--s3);
+}
+
+.verify-digit {
+    width: 100%;
+    min-height: 60px;
+    padding: 0;
+    background-color: var(--canvas);
+    color: var(--heading);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    outline: none;
+    font-family: var(--font-sans);
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+    transition: background-color var(--t-fast), border-color var(--t-fast),
+                box-shadow var(--t-fast);
+}
+
+.verify-digit:focus {
+    background-color: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(178, 106, 32, .16);
+}
+
+.verify-digit:disabled { opacity: .6; }
+
+.verify-modal.has-error .verify-digit {
+    border-color: var(--danger);
+    background-color: var(--danger-soft);
+}
+
+.verify-error {
+    min-height: 1.4em;          /* reserve the line so the panel never jumps */
+    margin-bottom: var(--s3);
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    color: var(--danger);
+}
+
+.verify-submit { width: 100%; }
+
+/* Russian and German run these two labels long enough to collide, so they
+   wrap onto their own lines rather than being squeezed together. */
+.verify-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s1) var(--s4);
+    margin-top: var(--s4);
+    font-size: var(--fs-sm);
+}
+
+.verify-expiry {
+    flex: 1 1 auto;
+    color: var(--text-3);
+}
+.verify-expiry.is-expired { color: var(--danger); }
+
+.verify-resend {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.verify-resend:disabled {
+    color: var(--text-3);
+    cursor: default;
+    text-decoration: none;
+}
+
+/* A wrong code is worth a physical nudge, not just a colour change. */
+@keyframes verify-shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+
+.verify-modal.shake .verify-modal-panel {
+    animation: verify-shake 400ms cubic-bezier(.36, .07, .19, .97);
+}
+
+@media (max-width: 480px) {
+    .verify-modal { padding: var(--s3); }
+    .verify-modal-panel { padding: var(--s5); }
+    .verify-digits { gap: 6px; }
+    .verify-digit {
+        min-height: 52px;
+        font-size: 1.3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .verify-modal.shake .verify-modal-panel { animation: none; }
+}
+
+/* ==========================================================================
+   17. PHONE COUNTRY PICKER
+   A flag cannot live inside an <option>, so this is a custom combobox: a
+   button carrying the flag and dial code, a number box beside it, and a
+   filterable listbox below. The two visible controls write into one hidden
+   `phone` input, so the rest of the form sees an ordinary field.
+   ========================================================================== */
+.phone-field {
+    position: relative;
+    display: flex;
+    gap: var(--s2);
+}
+
+.phone-country {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 10px;
+    background-color: var(--canvas);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    transition: background-color var(--t-fast), border-color var(--t-fast),
+                box-shadow var(--t-fast);
+}
+
+.phone-country:hover { border-color: var(--border-strong); }
+
+.phone-country:focus-visible {
+    background-color: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(178, 106, 32, .16);
+    outline: none;
+}
+
+/* Flags are photographic rectangles, not icons: a hairline keeps the white
+   ones (Japan, Poland) from dissolving into a light page. */
+.phone-flag {
+    display: block;
+    width: 20px;
+    height: 15px;
+    object-fit: cover;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(23, 36, 34, .18);
+}
+
+[data-theme="dark"] .phone-flag {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .22);
+}
+
+.phone-dial {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.phone-caret {
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-3);
+}
+
+.phone-field .phone-number { flex: 1 1 auto; min-width: 0; }
+
+/* --- the popup --------------------------------------------------------- */
+.phone-pop {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 40;
+    width: min(340px, 100%);
+    padding: var(--s2);
+    background-color: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    box-shadow: var(--sh-3);
+}
+
+.phone-pop[hidden] { display: none; }
+
+.phone-field .phone-search {
+    width: 100%;
+    min-height: 38px;
+    margin-bottom: var(--s2);
+    padding: 8px var(--s3);
+    background-color: var(--canvas);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    outline: none;
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+}
+
+.phone-field .phone-search:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(178, 106, 32, .16);
+}
+
+.phone-list {
+    max-height: 280px;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.phone-option {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: 8px var(--s2);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-size: var(--fs-sm);
+    line-height: 1.3;
+}
+
+.phone-option-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text);
+}
+
+.phone-option-dial {
+    flex: 0 0 auto;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Hover and keyboard focus are the same state, so the mouse and the arrow
+   keys never disagree about which row is current. */
+.phone-option:hover,
+.phone-option.is-active {
+    background-color: var(--accent-soft);
+}
+
+.phone-option.is-active .phone-option-dial { color: var(--text-2); }
+
+.phone-option.is-selected .phone-option-name { font-weight: 700; }
+
+.phone-empty {
+    padding: var(--s4) var(--s2);
+    color: var(--text-3);
+    font-size: var(--fs-sm);
+    text-align: center;
+}
+
+/* The popup lives inside the phone form-group, so without this its search box
+   would turn red whenever the phone field is invalid. Only the two controls
+   the visitor is actually being corrected on should show the error. */
+.form-group.is-invalid .phone-country,
+.form-group.is-invalid .phone-number {
+    border-color: var(--danger);
+    background-color: var(--danger-soft);
+}
+
+.form-group.is-invalid .phone-search {
+    border-color: var(--border);
+    background-color: var(--canvas);
+}
+
+@media (max-width: 560px) {
+    .phone-pop { width: 100%; }
+    .phone-dial { font-size: var(--fs-sm); }
+}

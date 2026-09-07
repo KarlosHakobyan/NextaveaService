@@ -1,0 +1,1608 @@
+/* ==========================================================================
+   Nextavéa Service Operations console
+   "Dispatch ledger": a working document, not a product surface.
+   Ink rail · warm workspace · ruled ledger rows · stamped status chits.
+   Brass is reserved for actions the operator takes. Nothing else is brass.
+
+   Layers: fonts · tokens · base · login · shell · tally · filters · ledger
+           status · drawer · forms · panels · feedback · a11y · responsive
+   ========================================================================== */
+
+/* ==========================================================================
+   0. WEBFONTS: identical to the public site.
+   Montserrat is self-hosted from assets/fonts/. Playfair Display and Manrope
+   come from Google Fonts via the <link> in index.html and login.html, the
+   same way the public index.html loads them.
+   ========================================================================== */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+    font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../assets/fonts/Montserrat-SemiBold.ttf') format('truetype');
+    font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../assets/fonts/Montserrat-Bold.ttf') format('truetype');
+    font-weight: 700; font-style: normal; font-display: swap;
+}
+
+/* ==========================================================================
+   1. TOKENS
+   Derived from the public site's palette, stepped cooler and denser for
+   sustained screen time. Change a token, not a rule.
+   ========================================================================== */
+:root {
+    /* --- Structure --- */
+    --rail:          #0F2A2E;
+    --rail-2:        #0A1F22;
+    --rail-line:     #1D3E42;
+    --bg:            #F4F2EE;
+    --surface:       #FFFFFF;
+    --surface-2:     #FAF8F5;
+    --line:          #E4DED3;
+    --line-strong:   #D3CABA;
+
+    /* --- Text --- */
+    --text:          #172A28;
+    --text-2:        #5C6B68;
+    --text-3:        #8A938F;
+    --on-rail:       #EDE7DD;
+    --on-rail-2:     #8FA3A0;
+
+    /* --- Action: brass, and only brass --- */
+    --brass:         #B26A20;
+    --brass-hover:   #8F5318;
+    --brass-soft:    #FBF1E3;
+    --brass-line:    #E8CFA8;
+    --brass-on-rail: #E0A458;
+
+    /* --- Status: one hue per pipeline stage --- */
+    --st-new:         #B26A20;
+    --st-new-bg:      #F9EFDF;
+    --st-contacted:   #1F5551;
+    --st-contacted-bg:#DFEBE9;
+    --st-scheduled:   #3E5FA3;
+    --st-scheduled-bg:#E2E8F5;
+    --st-done:        #2F6B4F;
+    --st-done-bg:     #DFEBE3;
+    --st-cancelled:   #7C857F;
+    --st-cancelled-bg:#EAE9E5;
+
+    --danger:        #A33A2B;
+    --danger-bg:     #F8E7E3;
+    --warn:          #8A5A16;
+    --warn-bg:       #F9F0DC;
+
+    /* --- Category tint, echoing the public badges --- */
+    --cat-cleaning:    #1F5551;
+    --cat-furniture:   #2F5A32;
+    --cat-restoration: #8A5A16;
+    --cat-relocation:  #3E5FA3;
+
+    /* --- Type ---
+       The same three faces as the public site, used the same way:
+       Montserrat carries everything; the brand mark is Playfair Display and
+       the nav is Manrope, exactly as `.logo` and `header nav a` are set in
+       css/components.css. There is no fourth face: data columns stay in
+       Montserrat and align on `font-variant-numeric: tabular-nums`. */
+    --sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+            Roboto, Helvetica, Arial, sans-serif;
+    --font-data: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                 Roboto, Helvetica, Arial, sans-serif;
+
+    --font-header-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-header-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                        Roboto, Helvetica, Arial, sans-serif;
+
+    --fs-page:   1.5rem;
+    --fs-sect:   1.0625rem;
+    --fs-body:   0.875rem;
+    --fs-sm:     0.8125rem;
+    --fs-micro:  0.6875rem;
+    --fs-tally:  1.75rem;
+
+    --track-eyebrow: 0.11em;
+
+    /* --- Space (4px base) --- */
+    --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+    --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+    /* --- Radii: small. This is a tool, not a card deck. --- */
+    --r-sm: 4px; --r-md: 6px; --r-lg: 10px; --r-pill: 999px;
+
+    /* --- Elevation: warm-tinted, never pure black --- */
+    --sh-1: 0 1px 2px rgba(23,36,34,.06);
+    --sh-2: 0 2px 4px rgba(23,36,34,.05), 0 10px 20px -10px rgba(23,36,34,.14);
+    --sh-3: 0 4px 10px rgba(23,36,34,.06), 0 24px 48px -20px rgba(23,36,34,.28);
+
+    /* --- Layout --- */
+    --rail-w:   228px;
+    --topbar-h: 56px;
+    --drawer-w: 560px;
+
+    /* --- Motion --- */
+    --t-fast: 120ms cubic-bezier(.2,.6,.3,1);
+    --t-base: 220ms cubic-bezier(.2,.6,.3,1);
+}
+
+/* ==========================================================================
+   1b. DARK THEME
+   The workspace goes to ink and surfaces lift a step out of it, so the rail
+   and the working area stay distinct instead of merging into one dark field.
+   Status colours are re-tuned rather than reused: the light-mode teal and
+   green lose their separation once the background stops being paper.
+
+   Only tokens change here. Every rule after this point is written once.
+   ========================================================================== */
+[data-theme="dark"] {
+    /* --- Structure --- */
+    --rail:          #071619;
+    --rail-2:        #05070F;
+    --rail-line:     #16343A;
+    --bg:            #0A1E22;
+    --surface:       #102A2F;
+    --surface-2:     #0D2429;
+    --line:          #1E3A3F;
+    --line-strong:   #2B4B51;
+
+    /* --- Text --- */
+    --text:          #E9E4DB;
+    --text-2:        #A7B4B1;
+    --text-3:        #7D8B88;
+    --on-rail:       #EDE7DD;
+    --on-rail-2:     #8FA3A0;
+
+    /* --- Action --- */
+    --brass:         #D98B3A;
+    --brass-hover:   #E9A257;
+    --brass-soft:    #2B1F11;
+    --brass-line:    #4C3720;
+    --brass-on-rail: #E0A458;
+
+    /* --- Status: lifted for contrast, kept distinct from one another --- */
+    --st-new:         #E0A458;
+    --st-new-bg:      #33240F;
+    --st-contacted:   #6FBDB4;
+    --st-contacted-bg:#15322F;
+    --st-scheduled:   #8AA6E0;
+    --st-scheduled-bg:#1A2540;
+    --st-done:        #6BB68C;
+    --st-done-bg:     #14301F;
+    --st-cancelled:   #93A09B;
+    --st-cancelled-bg:#22282A;
+
+    --danger:        #E28374;
+    --danger-bg:     #3A1B16;
+    --warn:          #E0A458;
+    --warn-bg:       #322412;
+
+    /* --- Category tint --- */
+    --cat-cleaning:    #6FBDB4;
+    --cat-furniture:   #8FC095;
+    --cat-restoration: #E0A458;
+    --cat-relocation:  #8AA6E0;
+
+    /* --- Elevation --- */
+    --sh-1: 0 1px 2px rgba(0, 0, 0, .40);
+    --sh-2: 0 2px 4px rgba(0, 0, 0, .35), 0 10px 20px -10px rgba(0, 0, 0, .55);
+    --sh-3: 0 4px 10px rgba(0, 0, 0, .40), 0 24px 48px -20px rgba(0, 0, 0, .70);
+}
+
+/* The scrims are tuned for a light page behind them. On a dark one they need
+   to be heavier or the drawer stops reading as a layer above the ledger. */
+[data-theme="dark"] .drawer-scrim,
+[data-theme="dark"] .modal-scrim {
+    background: rgba(0, 0, 0, .62);
+}
+
+/* Buttons whose hover is a wash of the text colour need it inverted. */
+[data-theme="dark"] .btn-quiet:hover:not(:disabled),
+[data-theme="dark"] .btn-icon:hover:not(:disabled) {
+    background: rgba(255, 255, 255, .08);
+}
+
+/* Leaflet ships a white map frame and light controls. */
+[data-theme="dark"] .drawer-map { border-color: var(--line); }
+[data-theme="dark"] .leaflet-control-zoom a {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--line);
+}
+/* Leaflet's own sheet is injected after this one, so these carry the extra
+   `.leaflet-container` to win on specificity rather than on !important. */
+[data-theme="dark"] .leaflet-container .leaflet-control-attribution {
+    background: rgba(16, 42, 47, .82);
+    color: var(--text-2);
+}
+[data-theme="dark"] .leaflet-container .leaflet-control-attribution a { color: var(--text-2); }
+
+/* Portfolio photography is mixed. Hold it back so it does not glare. */
+[data-theme="dark"] .shot-figure img { filter: brightness(.88) saturate(.95); }
+
+/* ==========================================================================
+   1c. THEME TOGGLE
+   Sits in the rail directly below Settings, built from the same parts as a
+   rail link so the column reads as one list rather than a list plus a
+   control bolted underneath.
+   ========================================================================== */
+.rail-theme {
+    width: 100%;
+    font-family: var(--font-header-sans);
+    font-size: var(--fs-body);
+    font-weight: 600;
+    text-align: left;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: var(--s3);
+    min-height: 44px;
+    border-radius: var(--r-md);
+    color: var(--on-rail-2);
+    transition: color var(--t-fast), background var(--t-fast);
+}
+.rail-theme:hover { color: var(--on-rail); background: rgba(255, 255, 255, .05); }
+.rail-theme svg { width: 18px; height: 18px; flex: none; }
+
+/* A hairline above it separates navigation from preference without adding
+   a heading nobody needs to read twice. */
+.rail-theme-group {
+    margin-top: var(--s3);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--rail-line);
+}
+
+/* The language select shares the theme toggle's group, so preferences read
+   as one block below the sections rather than two unrelated controls. */
+.rail-lang {
+    width: 100%;
+    margin-top: var(--s1);
+    font-family: var(--font-header-sans);
+    font-size: var(--fs-body);
+    font-weight: 600;
+    color: var(--on-rail-2);
+    background-color: rgba(255, 255, 255, .05);
+    border: 1px solid var(--rail-line);
+    border-radius: var(--r-md);
+    padding: 0 var(--s3);
+    min-height: 40px;
+    cursor: pointer;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 16px) 17px, calc(100% - 11px) 17px;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    transition: color var(--t-fast), border-color var(--t-fast);
+}
+.rail-lang:hover { color: var(--on-rail); border-color: var(--brass-on-rail); }
+.rail-lang option { background-color: var(--rail); color: var(--on-rail); }
+
+/* Same control on the sign-in page, sitting beside the theme button. */
+.login-lang {
+    display: block;
+    margin: var(--s3) auto 0;
+    font-family: var(--font-header-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--on-rail-2);
+    background: none;
+    border: 1px solid var(--rail-line);
+    border-radius: var(--r-pill);
+    padding: 0 var(--s4);
+    min-height: 40px;
+    cursor: pointer;
+}
+.login-lang:hover { color: var(--on-rail); border-color: var(--brass-on-rail); }
+.login-lang option { background-color: var(--rail); color: var(--on-rail); }
+
+/* On the sign-in page the toggle sits under the card, quiet enough that it
+   never competes with the one thing that screen is for. */
+.login-theme {
+    margin: var(--s5) auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s2);
+    min-height: 40px;
+    padding: 0 var(--s4);
+    font-family: var(--font-header-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--on-rail-2);
+    background: none;
+    border: 1px solid var(--rail-line);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: color var(--t-fast), border-color var(--t-fast);
+}
+.login-theme:hover { color: var(--on-rail); border-color: var(--brass-on-rail); }
+.login-theme svg { width: 16px; height: 16px; }
+
+/* ==========================================================================
+   2. BASE
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: var(--fs-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* Numerals line up on tabular figures rather than on a monospace face, so
+   the console never introduces a font the public site does not use. */
+.num, .figures {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+}
+
+.eyebrow {
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-3);
+}
+
+code {
+    font-family: var(--font-data);
+    font-weight: 600;
+    font-size: 0.95em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    padding: 1px 5px;
+    overflow-wrap: anywhere;
+}
+
+.sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ==========================================================================
+   3. LOGIN
+   A single ink field. The key is the only thing on screen.
+   ========================================================================== */
+/* Shown by index.html while the stored key is re-checked, so the console
+   never opens on a blank white page. Replaced by the shell, or the browser
+   leaves for login.html. */
+.booting {
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--s2);
+    background: var(--rail);
+    text-align: center;
+    padding: var(--s5);
+}
+.booting .login-kicker { margin: 0; }
+.booting-line { color: var(--on-rail); font-size: var(--fs-sm); }
+
+.login-screen {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: var(--rail);
+    padding: var(--s5);
+}
+
+.login-panel { width: 100%; max-width: 400px; }
+
+.login-mark {
+    font-family: var(--font-header-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--on-rail);
+    margin-bottom: var(--s2);
+}
+.login-mark span { color: var(--brass-on-rail); font-weight: 400; }
+
+.login-kicker {
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--on-rail-2);
+    margin-bottom: var(--s6);
+}
+
+.login-form {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: var(--s6);
+    box-shadow: var(--sh-3);
+}
+
+.login-form h1 {
+    font-size: var(--fs-sect);
+    font-weight: 700;
+    margin-bottom: var(--s2);
+}
+
+.login-help {
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    margin-bottom: var(--s5);
+}
+
+.login-remember {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    margin: var(--s4) 0 var(--s5);
+    cursor: pointer;
+}
+.login-remember input { width: 16px; height: 16px; accent-color: var(--brass); }
+
+.login-note {
+    margin-top: var(--s5);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--line);
+    font-size: var(--fs-micro);
+    line-height: 1.6;
+    color: var(--text-3);
+}
+
+/* Shown when nothing is listening on the API address: there is no key to
+   get wrong yet, and the operator should not go looking for one. */
+.login-hint {
+    background: var(--warn-bg);
+    color: var(--warn);
+    border-left: 3px solid var(--warn);
+    padding: var(--s3) var(--s4);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    margin-bottom: var(--s4);
+}
+.login-hint strong { display: block; font-weight: 700; margin-bottom: 2px; }
+
+.login-error {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-left: 3px solid var(--danger);
+    padding: var(--s3) var(--s4);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    font-size: var(--fs-sm);
+    margin-bottom: var(--s4);
+}
+
+/* ==========================================================================
+   4. SHELL: ink rail, topbar, workspace
+   ========================================================================== */
+.admin-root { min-height: 100vh; }
+
+.shell {
+    display: grid;
+    grid-template-columns: var(--rail-w) minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+/* --- Rail --- */
+.rail {
+    background: var(--rail);
+    border-right: 1px solid var(--rail-2);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.rail-mark {
+    padding: var(--s5) var(--s5) var(--s4);
+    border-bottom: 1px solid var(--rail-line);
+}
+.rail-mark strong {
+    display: block;
+    font-family: var(--font-header-display);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--on-rail);
+    letter-spacing: -0.01em;
+}
+.rail-mark span {
+    display: block;
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--brass-on-rail);
+    margin-top: var(--s1);
+}
+
+.rail-nav { padding: var(--s4) var(--s3); flex: 1; }
+
+.rail-link {
+    position: relative;
+    font-family: var(--font-header-sans);
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: var(--s3);
+    min-height: 44px;
+    border-radius: var(--r-md);
+    color: var(--on-rail-2);
+    font-size: var(--fs-body);
+    font-weight: 600;
+    transition: color var(--t-fast), background var(--t-fast);
+}
+.rail-link:hover { color: var(--on-rail); background: rgba(255,255,255,.05); }
+
+.rail-link.is-active { color: var(--on-rail); background: rgba(255,255,255,.07); }
+
+/* The active marker is a brass edge, not a filled block. */
+.rail-link.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 3px;
+    height: 22px;
+    background: var(--brass-on-rail);
+    border-radius: 0 2px 2px 0;
+}
+
+.rail-icon {
+    flex: none;
+    width: 18px; height: 18px;
+    display: grid; place-items: center;
+    color: currentColor;
+}
+.rail-icon svg { width: 18px; height: 18px; }
+
+.rail-count {
+    margin-left: auto;
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-micro);
+    color: var(--rail);
+    background: var(--brass-on-rail);
+    border-radius: var(--r-pill);
+    padding: 1px var(--s2);
+    min-width: 20px;
+    text-align: center;
+}
+
+.rail-foot {
+    padding: var(--s4) var(--s5) var(--s5);
+    border-top: 1px solid var(--rail-line);
+}
+.rail-foot .eyebrow { color: var(--on-rail-2); }
+
+.rail-signout {
+    margin-top: var(--s3);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--on-rail-2);
+    background: none;
+    border: 0;
+    padding: var(--s2) 0;
+    min-height: 32px;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: color var(--t-fast);
+}
+.rail-signout:hover { color: var(--brass-on-rail); }
+
+/* --- Workspace --- */
+.workspace { min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    padding: 0 var(--s6);
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.topbar-title { font-size: 0.9375rem; font-weight: 700; letter-spacing: -0.005em; }
+
+.topbar-meta { margin-left: auto; display: flex; align-items: center; gap: var(--s4); }
+
+.conn-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    padding: var(--s1) var(--s3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+}
+.conn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--st-done); flex: none; }
+.conn-chip.is-demo { color: var(--warn); border-color: var(--brass-line); background: var(--warn-bg); }
+.conn-chip.is-demo .conn-dot { background: var(--warn); }
+
+.view { padding: var(--s6); flex: 1; min-width: 0; }
+
+.view-head {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--s4);
+    flex-wrap: wrap;
+    margin-bottom: var(--s5);
+}
+.view-head h1 {
+    font-size: var(--fs-page);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+.view-head p { font-size: var(--fs-sm); color: var(--text-2); margin-top: var(--s1); }
+.view-head-actions { margin-left: auto; display: flex; gap: var(--s2); }
+
+.section-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s3);
+    margin-bottom: var(--s3);
+}
+.section-head h2 { font-size: var(--fs-sect); font-weight: 700; letter-spacing: -0.01em; }
+.section-head .section-link { margin-left: auto; }
+
+.section-link {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--brass);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--t-fast);
+}
+.section-link:hover { border-bottom-color: var(--brass); }
+
+.stack-lg > * + * { margin-top: var(--s7); }
+
+/* --- API-unreachable banner --- */
+.demo-banner {
+    background: var(--warn-bg);
+    border-left: 3px solid var(--warn);
+    color: var(--warn);
+    padding: var(--s3) var(--s4);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    font-size: var(--fs-sm);
+    margin-bottom: var(--s5);
+}
+.demo-banner strong { font-weight: 700; }
+.demo-banner code {
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    background: rgba(138,90,22,.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+/* ==========================================================================
+   5. TALLY STRIP
+   Deliberately not KPI cards. Hairline-divided counts, read left to right
+   as one sentence about the state of the shop.
+   ========================================================================== */
+.tally {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+}
+
+.tally-cell {
+    padding: var(--s4) var(--s5);
+    border-left: 1px solid var(--line);
+    min-width: 0;
+}
+.tally-cell:first-child { border-left: 0; }
+
+.tally-value {
+    display: block;
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-tally);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+.tally-label {
+    display: block;
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-top: var(--s2);
+}
+.tally-cell.is-accent .tally-value { color: var(--brass); }
+
+/* ==========================================================================
+   6. FILTER BAR
+   ========================================================================== */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    align-items: center;
+    margin-bottom: var(--s4);
+}
+
+.search-field { position: relative; flex: 1 1 240px; min-width: 200px; }
+.search-field .input { padding-left: 36px; }
+.search-icon {
+    position: absolute;
+    left: var(--s3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    pointer-events: none;
+    display: grid;
+    place-items: center;
+}
+.search-icon svg { width: 16px; height: 16px; }
+
+.filter-clear {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-2);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-family: var(--sans);
+    padding: var(--s2) var(--s3);
+    min-height: 38px;
+    border-radius: var(--r-md);
+    transition: color var(--t-fast), background var(--t-fast);
+}
+.filter-clear:hover { color: var(--danger); background: var(--danger-bg); }
+
+.result-count {
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   7. LEDGER
+   Ruled rows, not cards. Numerals align because they are meant to be
+   scanned down a column.
+   ========================================================================== */
+.ledger-wrap {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+}
+
+.ledger-scroll { overflow-x: auto; }
+
+.ledger { width: 100%; border-collapse: collapse; min-width: 860px; }
+
+.ledger thead th {
+    text-align: left;
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: var(--s3) var(--s4);
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--surface-2);
+    white-space: nowrap;
+}
+
+.ledger tbody td {
+    padding: var(--s3) var(--s4);
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+}
+.ledger tbody tr:last-child td { border-bottom: 0; }
+
+.ledger tbody tr { cursor: pointer; transition: background var(--t-fast); }
+.ledger tbody tr:hover { background: var(--surface-2); }
+.ledger tbody tr.is-open { background: var(--brass-soft); }
+
+/* A cell that carries two lines: the value, then its quieter qualifier. */
+.cell-stack { display: grid; gap: 2px; min-width: 0; }
+.cell-stack small { color: var(--text-3); font-size: var(--fs-micro); }
+
+.cell-id {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    color: var(--text-3);
+    white-space: nowrap;
+}
+.cell-name { font-weight: 600; white-space: nowrap; }
+.cell-phone {
+    font-family: var(--font-data);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    white-space: nowrap;
+}
+.cell-addr {
+    color: var(--text-2);
+    font-size: var(--fs-sm);
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cell-when {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    white-space: nowrap;
+}
+.cell-when small { display: block; color: var(--text-3); font-size: var(--fs-micro); }
+.cell-price {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+}
+.cell-price.is-unset { color: var(--text-3); font-weight: 400; }
+
+/* ==========================================================================
+   8. STATUS STAMP AND PIPELINE RAIL: the signature devices
+   A status is a stamped chit: colour bar, mono label. Never a dot-pill.
+   ========================================================================== */
+.stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-2);
+}
+.stamp::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: currentColor;
+    border-radius: 1px;
+    flex: none;
+}
+.stamp-new       { color: var(--st-new); }
+.stamp-contacted { color: var(--st-contacted); }
+.stamp-scheduled { color: var(--st-scheduled); }
+.stamp-done      { color: var(--st-done); }
+.stamp-cancelled { color: var(--st-cancelled); }
+
+/* Category is quieter than status, because it is context rather than state. */
+.cat-tag { font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; }
+.cat-cleaning    { color: var(--cat-cleaning); }
+.cat-furniture   { color: var(--cat-furniture); }
+.cat-restoration { color: var(--cat-restoration); }
+.cat-relocation  { color: var(--cat-relocation); }
+
+/* --- Pipeline rail: punch a job forward --- */
+.pipeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+}
+
+.pipe-step {
+    background: var(--surface);
+    border: 0;
+    padding: var(--s3) var(--s2);
+    min-height: 52px;
+    cursor: pointer;
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s2);
+    transition: background var(--t-fast), color var(--t-fast);
+}
+.pipe-step::before {
+    content: '';
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--line-strong);
+    transition: background var(--t-fast);
+}
+.pipe-step:hover { background: var(--surface-2); color: var(--text); }
+
+/* Reached: the bar is filled in that stage's colour. */
+.pipe-step.is-reached { color: var(--text-2); }
+.pipe-step.is-reached::before { background: var(--stage-color, var(--brass)); }
+
+/* Current: the stage the job is sitting in. */
+.pipe-step.is-current {
+    background: var(--stage-bg, var(--brass-soft));
+    color: var(--stage-color, var(--brass));
+    font-weight: 700;
+}
+.pipe-step:disabled { cursor: default; }
+
+/* ==========================================================================
+   9. DRAWER
+   ========================================================================== */
+.drawer-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,42,46,.42);
+    z-index: 60;
+    opacity: 0;
+    animation: scrim-in var(--t-base) forwards;
+}
+@keyframes scrim-in { to { opacity: 1; } }
+
+.drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(var(--drawer-w), 100%);
+    background: var(--bg);
+    z-index: 61;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--sh-3);
+    transform: translateX(16px);
+    opacity: 0;
+    animation: drawer-in var(--t-base) forwards;
+}
+@keyframes drawer-in { to { transform: translateX(0); opacity: 1; } }
+
+.drawer-head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s4);
+    padding: var(--s5);
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+.drawer-head h2 { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; }
+.drawer-head .eyebrow { margin-bottom: var(--s1); }
+.drawer-close { margin-left: auto; }
+
+.drawer-body { flex: 1; overflow-y: auto; padding: var(--s5); }
+.drawer-body > * + * { margin-top: var(--s5); }
+
+.drawer-foot {
+    padding: var(--s4) var(--s5);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: var(--s2);
+    align-items: center;
+}
+.drawer-foot .spacer { margin-left: auto; }
+
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: var(--s5);
+}
+.panel > .panel-title { margin-bottom: var(--s4); }
+.panel-title {
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-3);
+}
+.panel-flush { padding: 0; overflow: hidden; }
+
+/* --- Definition rows --- */
+.dl { display: grid; grid-template-columns: 108px minmax(0,1fr); gap: var(--s3) var(--s4); }
+.dl dt {
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding-top: 2px;
+}
+.dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.dl dd.is-empty { color: var(--text-3); }
+
+.drawer-map {
+    height: 220px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+}
+.drawer-map-fallback {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: var(--s4);
+    color: var(--text-3);
+    font-size: var(--fs-sm);
+}
+/* Leaflet marker: a brass dot on an ink ring, built from the same two colours
+   the rest of the console uses rather than Leaflet's default blue pin. */
+.admin-pin { background: none; border: 0; }
+.admin-pin-dot {
+    display: block;
+    width: 16px;
+    height: 16px;
+    margin: 3px;
+    border-radius: 50%;
+    background: var(--brass);
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 1.5px var(--rail), var(--sh-2);
+}
+
+.coords {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-micro);
+    color: var(--text-3);
+    margin-top: var(--s2);
+}
+
+/* --- Notes --- */
+.note-list > li {
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line);
+    font-size: var(--fs-sm);
+}
+.note-list > li:last-child { border-bottom: 0; padding-bottom: 0; }
+.note-list > li:first-child { padding-top: 0; }
+.note-meta {
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: 0.04em;
+    color: var(--text-3);
+    margin-bottom: var(--s1);
+}
+.note-body { color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ==========================================================================
+   10. FORMS & BUTTONS
+   ========================================================================== */
+.field { display: block; }
+.field + .field { margin-top: var(--s4); }
+
+.field-label {
+    display: block;
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    margin-bottom: var(--s2);
+}
+
+.input, .select, .textarea {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: var(--fs-body);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-md);
+    padding: var(--s3);
+    min-height: 40px;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.input::placeholder, .textarea::placeholder { color: var(--text-3); }
+
+.input:hover, .select:hover, .textarea:hover { border-color: var(--text-3); }
+
+.input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--brass);
+    box-shadow: 0 0 0 3px var(--brass-soft);
+}
+
+.input-data {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+.textarea { min-height: 84px; resize: vertical; line-height: 1.55; }
+
+.select {
+    appearance: none;
+    padding-right: var(--s6);
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 18px) 17px, calc(100% - 13px) 17px;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+.select-sm { min-height: 38px; padding-top: var(--s2); padding-bottom: var(--s2); width: auto; }
+
+.field-hint { font-size: var(--fs-micro); color: var(--text-3); margin-top: var(--s2); line-height: 1.5; }
+
+.field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--s4);
+}
+.field-row .field + .field { margin-top: 0; }
+
+/* --- Buttons --- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s2);
+    font-family: var(--sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1;
+    min-height: 40px;
+    padding: 0 var(--s4);
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast), transform var(--t-fast);
+}
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.btn-primary { background: var(--brass); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--brass-hover); }
+
+.btn-ghost { background: var(--surface); color: var(--text); border-color: var(--line-strong); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--text-3); background: var(--surface-2); }
+
+.btn-quiet { background: none; color: var(--text-2); }
+.btn-quiet:hover:not(:disabled) { color: var(--text); background: rgba(23,42,40,.05); }
+
+.btn-danger { background: none; color: var(--danger); }
+.btn-danger:hover:not(:disabled) { background: var(--danger-bg); }
+
+.btn-block { width: 100%; }
+.btn-sm { min-height: 32px; font-size: var(--fs-micro); padding: 0 var(--s3); }
+
+.btn-icon {
+    width: 36px;
+    min-height: 36px;
+    padding: 0;
+    background: none;
+    color: var(--text-2);
+}
+.btn-icon:hover:not(:disabled) { background: rgba(23,42,40,.06); color: var(--text); }
+
+/* ==========================================================================
+   11. PANELS: catalog, portfolio, settings
+   ========================================================================== */
+.grid-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--s4);
+}
+
+.cat-group + .cat-group { margin-top: var(--s6); }
+
+.cat-group-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s3);
+    padding-bottom: var(--s3);
+    border-bottom: 2px solid var(--line-strong);
+    margin-bottom: var(--s3);
+}
+.cat-group-head h2 { font-size: var(--fs-sect); font-weight: 700; }
+.cat-group-head .eyebrow { margin-left: auto; }
+
+.svc-row {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 150px 88px;
+    gap: var(--s4);
+    align-items: center;
+    padding: var(--s3) var(--s4);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.svc-row + .svc-row { margin-top: var(--s2); }
+.svc-row:hover { border-color: var(--line-strong); box-shadow: var(--sh-1); }
+
+.svc-title { font-weight: 600; }
+.svc-desc {
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+.svc-price {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-align: right;
+}
+.svc-actions { display: flex; gap: var(--s1); justify-content: flex-end; }
+
+.shot {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.shot-figure { aspect-ratio: 4 / 3; background: var(--surface-2); overflow: hidden; position: relative; }
+.shot-figure img { width: 100%; height: 100%; object-fit: cover; }
+.shot-order {
+    position: absolute;
+    top: var(--s2); left: var(--s2);
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-micro);
+    background: var(--rail);
+    color: var(--on-rail);
+    padding: 2px var(--s2);
+    border-radius: var(--r-sm);
+}
+.shot-body { padding: var(--s3) var(--s4) var(--s4); flex: 1; display: flex; flex-direction: column; gap: var(--s2); }
+.shot-caption { font-size: var(--fs-sm); font-weight: 600; }
+.shot-file { font-family: var(--font-data); font-size: var(--fs-micro); color: var(--text-3); overflow-wrap: anywhere; }
+.shot-actions { margin-top: auto; display: flex; gap: var(--s1); padding-top: var(--s2); }
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--s4);
+    align-items: start;
+}
+
+.key-preview {
+    font-family: var(--font-data);
+    font-size: var(--fs-sm);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: var(--s3);
+    overflow-wrap: anywhere;
+}
+
+.endpoint-list > li {
+    display: grid;
+    grid-template-columns: 62px minmax(0,1fr);
+    gap: var(--s3);
+    align-items: baseline;
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-data);
+    font-size: var(--fs-micro);
+}
+.endpoint-list > li:last-child { border-bottom: 0; }
+.endpoint-verb { font-weight: 700; letter-spacing: 0.06em; color: var(--brass); }
+.endpoint-path { color: var(--text-2); overflow-wrap: anywhere; }
+
+/* ==========================================================================
+   11b. CALCULATOR
+   Inputs on the left, the answer on the right, and the arithmetic spelled
+   out underneath it. The figure is about to be read to a customer, so the
+   working is shown rather than hidden behind a single confident number.
+   ========================================================================== */
+.calc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: var(--s5);
+    align-items: start;
+}
+
+.calc-coverage {
+    margin-top: var(--s5);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--line);
+}
+.calc-coverage-value {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.125rem;
+    margin-top: var(--s1);
+}
+.calc-coverage-value strong { font-weight: 600; }
+.calc-coverage .btn { margin-top: var(--s3); }
+
+.calc-result.is-blocked { background: var(--surface-2); }
+
+.calc-total {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--brass);
+    margin-top: var(--s3);
+}
+
+.calc-mid {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    margin-top: var(--s2);
+}
+
+/* The arithmetic, set apart so it reads as evidence rather than as a caption. */
+.calc-working {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    background: var(--surface-2);
+    border-left: 3px solid var(--brass-line);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    padding: var(--s3) var(--s4);
+    margin-top: var(--s4);
+    overflow-wrap: anywhere;
+}
+.calc-result.is-blocked .calc-working { background: var(--surface); }
+
+.calc-blocked {
+    display: flex;
+    gap: var(--s4);
+    align-items: flex-start;
+    margin-top: var(--s3);
+}
+.calc-blocked-mark {
+    flex: none;
+    width: 32px; height: 32px;
+    color: var(--text-3);
+    display: grid; place-items: center;
+}
+.calc-blocked-mark svg { width: 32px; height: 32px; }
+.calc-blocked h3 {
+    font-size: var(--fs-sect);
+    font-weight: 700;
+    margin-bottom: var(--s2);
+}
+.calc-blocked p { font-size: var(--fs-sm); color: var(--text-2); }
+
+/* ==========================================================================
+   11c. ACTIVITY LOG
+   The same ruled ledger as Requests. Only the rows that point at a record
+   are clickable, so a hover that does nothing never suggests otherwise.
+   ========================================================================== */
+.log-ledger { min-width: 620px; }
+.log-ledger tbody tr { cursor: default; }
+.log-ledger tbody tr.is-linkable { cursor: pointer; }
+.log-ledger tbody tr:not(.is-linkable):hover { background: transparent; }
+
+.log-user {
+    font-weight: 600;
+    white-space: nowrap;
+}
+.log-what { color: var(--text-2); }
+.log-what strong { color: var(--text); font-weight: 600; }
+
+@media (max-width: 720px) {
+    .log-ledger { min-width: 0; }
+}
+
+/* ==========================================================================
+   12. FEEDBACK: empty, skeleton, toast, modal
+   ========================================================================== */
+.empty { text-align: center; padding: var(--s8) var(--s5); color: var(--text-2); }
+.empty-mark {
+    width: 40px; height: 40px;
+    margin: 0 auto var(--s4);
+    color: var(--text-3);
+    display: grid; place-items: center;
+}
+.empty-mark svg { width: 40px; height: 40px; }
+.empty h3 { font-size: var(--fs-sect); font-weight: 700; color: var(--text); margin-bottom: var(--s2); }
+.empty p { font-size: var(--fs-sm); max-width: 34ch; margin: 0 auto; }
+.empty .btn { margin-top: var(--s4); }
+
+.skeleton {
+    background: linear-gradient(90deg, var(--line) 25%, var(--surface-2) 37%, var(--line) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+    border-radius: var(--r-sm);
+    height: 12px;
+}
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+.skeleton-row { padding: var(--s4); border-bottom: 1px solid var(--line); display: grid; gap: var(--s2); }
+
+.toast-stack {
+    position: fixed;
+    bottom: var(--s5);
+    right: var(--s5);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    pointer-events: none;
+}
+.toast {
+    background: var(--rail);
+    color: var(--on-rail);
+    padding: var(--s3) var(--s4);
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    box-shadow: var(--sh-3);
+    border-left: 3px solid var(--brass-on-rail);
+    max-width: 360px;
+    animation: toast-in var(--t-base);
+}
+.toast.is-error { border-left-color: #E08A78; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(6px); } }
+
+.modal-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,42,46,.42);
+    z-index: 70;
+    display: grid;
+    place-items: center;
+    padding: var(--s5);
+    animation: scrim-in var(--t-base);
+}
+.modal {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-3);
+    width: min(520px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--s6);
+}
+.modal h2 { font-size: var(--fs-sect); font-weight: 700; margin-bottom: var(--s4); }
+.modal-actions { display: flex; gap: var(--s2); justify-content: flex-end; margin-top: var(--s5); }
+
+/* ==========================================================================
+   13. ACCESSIBILITY
+   ========================================================================== */
+:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+.rail :focus-visible { outline-color: var(--brass-on-rail); }
+.login-screen :focus-visible { outline-color: var(--brass-on-rail); }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .drawer { transform: none !important; opacity: 1 !important; }
+}
+
+/* ==========================================================================
+   14. RESPONSIVE
+   The rail becomes a horizontal scroller; the ledger becomes stacked
+   records that keep the ruled reading rhythm.
+   ========================================================================== */
+@media (max-width: 960px) {
+    .shell { grid-template-columns: 1fr; }
+
+    .rail {
+        position: static;
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--s3);
+        padding: 0 var(--s4);
+        border-right: 0;
+        border-bottom: 1px solid var(--rail-2);
+        overflow-x: auto;
+    }
+    .rail-mark { border-bottom: 0; padding: var(--s3) var(--s3) var(--s3) 0; flex: none; }
+    .rail-mark span { display: none; }
+    .rail-nav { display: flex; gap: var(--s1); padding: var(--s2) 0; flex: none; }
+    .rail-link { white-space: nowrap; }
+    .rail-link.is-active::before {
+        top: auto; bottom: 0;
+        left: var(--s3); right: var(--s3);
+        width: auto; height: 3px;
+        border-radius: 2px 2px 0 0;
+    }
+    .rail-foot { border-top: 0; padding: 0 0 0 var(--s3); margin-left: auto; flex: none; }
+    .rail-foot .eyebrow { display: none; }
+    .rail-signout { margin-top: 0; }
+
+    .view { padding: var(--s5) var(--s4); }
+    .topbar { padding: 0 var(--s4); }
+}
+
+@media (max-width: 980px) {
+    .calc-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 720px) {
+    .view-head-actions { margin-left: 0; width: 100%; }
+    .result-count { margin-left: 0; width: 100%; }
+
+    .tally-cell { border-left: 0; border-top: 1px solid var(--line); }
+    .tally-cell:first-child { border-top: 0; }
+
+    /* Ledger rows become records. Labels come from data-label. */
+    .ledger { min-width: 0; }
+    .ledger thead { display: none; }
+    .ledger tbody tr { display: block; padding: var(--s4); border-bottom: 1px solid var(--line); }
+    .ledger tbody tr:last-child { border-bottom: 0; }
+    .ledger tbody td { display: flex; gap: var(--s4); padding: var(--s1) 0; border: 0; }
+    .ledger tbody td::before {
+        content: attr(data-label);
+        font-family: var(--font-data);
+        font-size: var(--fs-micro);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-3);
+        flex: none;
+        width: 76px;
+    }
+    .cell-addr { max-width: none; white-space: normal; }
+    .cell-price { text-align: left; }
+
+    .svc-row { grid-template-columns: minmax(0,1fr); gap: var(--s2); }
+    .svc-price { text-align: left; }
+    .svc-actions { justify-content: flex-start; }
+
+    .dl { grid-template-columns: 1fr; gap: var(--s1) 0; }
+    .dl dd { margin-bottom: var(--s3); }
+
+    .pipeline { grid-template-columns: repeat(2, 1fr); }
+    .drawer-foot { flex-wrap: wrap; }
+    .toast-stack { left: var(--s4); right: var(--s4); bottom: var(--s4); }
+    .toast { max-width: none; }
+}
